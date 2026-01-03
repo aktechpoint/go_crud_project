@@ -30,7 +30,7 @@ WORKDIR /app
 
 # Copy binary from builder
 COPY --from=builder /app/app .COPY --from=builder /app/templates ./templates
-COPY --from=builder /app/static ./static
+#COPY --from=builder /app/static ./static
 
 
 # Expose application port
