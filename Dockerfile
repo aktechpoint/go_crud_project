@@ -18,7 +18,7 @@ COPY . .
 
 # Build the Go binary
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-    go build -o app ./cmd/server
+    go build -o app .
 
 # -------- Stage 2: Run --------
 FROM alpine:3.20
