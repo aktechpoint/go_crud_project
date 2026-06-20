@@ -1,43 +1,38 @@
-# -------- Stage 1: Build --------
-FROM golang:1.22-alpine AS builder
+# ---------- Build Stage ----------
+FROM golang:1.24.5-alpine AS builder
 
-# Install git (needed for go modules)
 RUN apk add --no-cache git
 
-# Set working directory
 WORKDIR /app
 
-# Copy go mod files first (cache optimization)
 COPY go.mod go.sum ./
 
-# Download dependencies
 RUN go mod download
 
-# Copy source code
 COPY . .
 
-# Build the Go binary
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     go build -o app .
 
-# -------- Stage 2: Run --------
+# ---------- Runtime Stage ----------
 FROM alpine:3.20
 
-# Create non-root user (security best practice)
 RUN adduser -D appuser
 
 WORKDIR /app
 
-# Copy binary from builder
-COPY --from=builder /app/app .COPY --from=builder /app/templates ./templates
-#COPY --from=builder /app/static ./static
+COPY --from=builder /app/app .
+COPY --from=builder /app/templates ./templates
 
+# Create uploads directory
+RUN mkdir -p /app/uploads && \
+    chown -R appuser:appuser /app/uploads
 
-# Expose application port
+# If uploads folder exists in source and contains default images
+# COPY --from=builder /app/uploads ./uploads
+
 EXPOSE 8080
 
-# Use non-root user
 USER appuser
 
-# Run the application
 CMD ["./app"]
